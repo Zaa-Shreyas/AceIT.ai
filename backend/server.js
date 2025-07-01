@@ -31,7 +31,7 @@ app.use("/api/session", sessionRoutes);
 app.use("/api/question", questionRoutes);
 
 app.use("/api/ai/generate-questions", protect, generateInterviewQuestions);
-app.use("/api/ai/generate-explanation", protect, generateExplanation);
+app.use("/api/ai/generate-explanation", protect, generateConceptExplanation);
 
 
 //Serve Uploads Folder
