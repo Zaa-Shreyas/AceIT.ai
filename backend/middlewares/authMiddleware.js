@@ -1,5 +1,5 @@
-const jwt = require("jsonwebtoken");
-const User = require("../models/User");
+import { verify } from "jsonwebtoken";
+import { findById } from "../models/User";
 
 // Middleware to protect routes
 const protect = async (req, res, next) => {
@@ -8,8 +8,8 @@ const protect = async (req, res, next) => {
 
         if (token && token.startsWith("Bearer ")) {
             token = token.split(" ")[1]; // Extract token
-            const decoded = jwt.verify(token, process.env.JWT_SECRET);
-            req.user = await User.findById(decoded.id).select("-password"); // Get user from token
+            const decoded = verify(token, process.env.JWT_SECRET);
+            req.user = await findById(decoded.id).select("-password"); // Get user from token
             next();
     }   else {
             res.status(401);
@@ -21,4 +21,4 @@ const protect = async (req, res, next) => {
     }
 };
 
-module.exports = { protect };
+export default { protect };

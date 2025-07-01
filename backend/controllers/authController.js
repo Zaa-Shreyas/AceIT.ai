@@ -1,10 +1,10 @@
-const User = require("../models/User.js");
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
+import { findOne, create, findById } from "../models/User.js";
+import { genSalt, hash, compare } from "bcryptjs";
+import { sign } from "jsonwebtoken";
 
 // Generate JWT token
 const generateToken = (userId) => {
-    return jwt.sign({ id: userId }, process.env.JWT_SECRET, {
+    return sign({ id: userId }, process.env.JWT_SECRET, {
       expiresIn: "1d",
     });
   };
@@ -17,18 +17,18 @@ const generateToken = (userId) => {
         const { name, email, password, profileImageUrl} = req.body;
 
         // Check if user already exists
-        const userExists = await User.findOne({ email });
+        const userExists = await findOne({ email });
         if (userExists) {
             res.status(400);
             throw new Error("User already exists");
         }
 
         // Hash password
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(password, salt);
+        const salt = await genSalt(10);
+        const hashedPassword = await hash(password, salt);
 
         // Create user
-        const user = await User.create({
+        const user = await create({
             name,
             email,
             password: hashedPassword,
@@ -56,14 +56,14 @@ const generateToken = (userId) => {
     try {
         const { email, password } = req.body;
 
-        const user = await User.findOne({ email });
+        const user = await findOne({ email });
         if (!user) {
             res.status(500);
             throw new Error("Invalid email or password");
         }
 
         // Compare password
-        const isMatch = await bcrypt.compare(password, user.password);
+        const isMatch = await compare(password, user.password);
         if (!isMatch) {
             res.status(500);
             throw new Error("Invalid email or password");
@@ -90,7 +90,7 @@ const generateToken = (userId) => {
   // @access Private
   const getUserProfile = async (req, res) => {
     try {
-        const user = await User.findById(req.user.id).select("-password");
+        const user = await findById(req.user.id).select("-password");
         if (!user) {
             res.status(404);
             throw new Error("User not found");
@@ -103,7 +103,7 @@ const generateToken = (userId) => {
     }
   };
 
-  module.exports = {
+  export default {
     registerUser,
     loginUser,
     getUserProfile,

@@ -1,10 +1,12 @@
 require('dotenv').config();
-const express = require('express');
-const cors = require('cors');
-const path = require('path');
-const connectDB = require('./config/db');
+import express, { json, serveStatic } from 'express';
+import cors from 'cors';
+import { join } from 'path';
+import connectDB from './config/db';
 
-const authRoutes = require('./routes/authRoutes');
+import authRoutes from './routes/authRoutes';
+import sessionRoutes from './routes/sessionRoutes';
+import questionRoutes from './routes/questionRoutes';
 
 
 
@@ -20,20 +22,20 @@ app.use(cors({
     connectDB()
 
 //Middleware    
-app.use(express.json());
+app.use(json());
 
 
 //Routes
 app.use("/api/auth", authRoutes);
-//app.use("/api/session", sessionRoutes);
-//app.use("/api/question", questionRoutes);
+app.use("/api/session", sessionRoutes);
+app.use("/api/question", questionRoutes);
 
-//app.use("/api/ai/generate-questions", Protect, generateInterviewQuestions);
-//app.use("/api/ai/generate-explanation", Protect, generateExplanation);
+app.use("/api/ai/generate-questions", Protect, generateInterviewQuestions);
+app.use("/api/ai/generate-explanation", Protect, generateExplanation);
 
 
 //Serve Uploads Folder
-app.use('/uploads', express.static(path.join(__dirname, 'uploads'), {}));
+app.use('/uploads', serveStatic(join(__dirname, 'uploads'), {}));
 
 
 //Start Sever
