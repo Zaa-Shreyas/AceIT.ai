@@ -1,5 +1,5 @@
-import Question from "../models/Question.js";
-import Session from "../models/Session.js";
+const Question = require("../models/Question.js");
+const Session = require("../models/Session.js");
 
 // @desc  Add additional questions to an existing session
 // @route  POST /api/questions/add
@@ -10,6 +10,10 @@ exports.addQuestionsToSession = async (req, res) => {
 
         if (!sessionId || !questions || !Array.isArray(questions)) {
             return res.status(400).json({ success: false, message: "Invalid request" });
+        }
+
+        if (session.user.toString() !== req.user._id.toString()) {
+        return res.status(401).json({ success: false, message: 'Unauthorized' });
         }
 
         const session = await Session.findById(sessionId);
@@ -56,7 +60,7 @@ exports.togglePinQuestion = async (req, res) => {
 // @desc  Update a note for a question
 // @route  POST /api/questions/:id/note
 // @access Private
-exports.updatQuestionNote = async (req, res) => {
+exports.updateQuestionNote = async (req, res) => {
     try {
         const { note } = req.body;
         const question = await Question.findById(req.params.id);

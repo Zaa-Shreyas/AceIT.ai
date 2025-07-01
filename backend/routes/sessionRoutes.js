@@ -1,12 +1,12 @@
-import { Router } from 'express';
-import { createSession, getMySession, updateSessionById, deleteSession } from '../controllers/sessionController';
-import { protect } from '../middlewares/authMiddleware';
+const express = require('express');
+const { createSession, getMySessions, updateSessionById, deleteSession } = require('../controllers/sessionController');
+const { protect } = require('../middlewares/authMiddleware');
 
-const router = Router();
+const router = express.Router();
 
-router.post('/create', protect, createSession);
-router.get('/my-sessions', protect, getMySession);
+router.post('/', protect, createSession);
+router.get('/', protect, getMySessions);
 router.put('/:id', protect, updateSessionById);
 router.delete('/:id', protect, deleteSession);
 
-export default router;
+module.exports = router;

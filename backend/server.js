@@ -1,12 +1,12 @@
 require('dotenv').config();
-import express, { json, serveStatic } from 'express';
-import cors from 'cors';
-import { join } from 'path';
-import connectDB from './config/db';
+const express = require('express');
+const cors = require('cors');
+const path = require('path');
+const connectDB = require('./config/db').default;
 
-import authRoutes from './routes/authRoutes';
-import sessionRoutes from './routes/sessionRoutes';
-import questionRoutes from './routes/questionRoutes';
+const authRoutes = require('./routes/authRoutes');
+const sessionRoutes = require('./routes/sessionRoutes');
+const questionRoutes = require('./routes/questionRoutes').default;
 
 
 
@@ -14,7 +14,7 @@ const app = express();
 
 //Middleware to handle CORS
 app.use(cors({
-    origin: '*',
+    origin: 'http://localhost:5173',
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization'],}));
 
@@ -22,7 +22,7 @@ app.use(cors({
     connectDB()
 
 //Middleware    
-app.use(json());
+app.use(express.json());
 
 
 //Routes
@@ -30,12 +30,12 @@ app.use("/api/auth", authRoutes);
 app.use("/api/session", sessionRoutes);
 app.use("/api/question", questionRoutes);
 
-app.use("/api/ai/generate-questions", Protect, generateInterviewQuestions);
-app.use("/api/ai/generate-explanation", Protect, generateExplanation);
+app.use("/api/ai/generate-questions", protect, generateInterviewQuestions);
+app.use("/api/ai/generate-explanation", protect, generateExplanation);
 
 
 //Serve Uploads Folder
-app.use('/uploads', serveStatic(join(__dirname, 'uploads'), {}));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads'), {}));
 
 
 //Start Sever

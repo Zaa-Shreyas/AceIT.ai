@@ -1,18 +1,18 @@
-import { create, find, findById } from "../models/Session.js";
-import { create as _create, deleteMany } from "../models/Question.js";
+const Session = require("../models/Session.js");
+const Question = require("../models/Question.js");
 
 // @desc  Create a session and linked questions
 // @route  POST /api/session/create
 // @access Private
-export async function createSession(req, res) {
+exports.createSession = async (req, res) => {
     try {
         const { role, experience, topicsToFocus, description, questions } = req.body;
         const userId = req.user._id; // Assuming you have the user's ID in req.user._id
-        const session = await create({ user: userId, role, experience, topicsToFocus, description });
+        const session = await Session.create({ user: userId, role, experience, topicsToFocus, description });
 
         const questionDocs = await Promise.all(
             questions.map(async (q) => {
-              const question = await _create({
+              const question = await Question.create({
                 session: session._id,
                 question: q.question,
                 answer: q.answer,
@@ -28,28 +28,28 @@ export async function createSession(req, res) {
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
-}
+};
 
 // @desc  Get all sessions for the logged in user
 // @route  GET /api/session/my-sessions
 // @access Private
-export async function getMySessions(req, res) {
+exports.updateMySessions = async (req, res) => {
     try {
-        const sessions = await find({ user: req.user._id })
+        const sessions = await Session.find({ user: req.user._id })
         .sort({ createdAt: -1 })
         .populate("questions");
         res.status(200).json({ success: true, sessions });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
-}
+};
 
 // @desc  Get a session by ID with populated questions
 // @route  GET /api/session/:id
 // @access Private
-export async function getSessionById(req, res) {
+exports.getSessionById = async (req, res) => {
     try {
-        const session = await findById(req.params.id)
+        const session = await Session.findById(req.params.id)
         .populate({
             path: "questions",
             options: { sort: { isPinned: -1, createdAt: 1}},
@@ -61,18 +61,20 @@ export async function getSessionById(req, res) {
             .status(404)
             .json({ success: false, message: "Session not found" });
         }
+        if (!role || !experience || !topicsToFocus) {
+        return res.status(400).json({ success: false, message: 'Role, experience, and topicsToFocus are required' });}
         res.status(200).json({ success: true, session });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
-}
+};
 
 // @desc  Delete a session by ID
 // @route  PUT /api/session/:id
 // @access Private
-export async function deleteSession(req, res) {
+exports.deleteSession = async (req, res) => {
     try {
-        const session = await findById(req.params.id);
+        const session = await Session.findById(req.params.id);
         if (!session) {
             return res
             .status(404)
@@ -87,7 +89,7 @@ export async function deleteSession(req, res) {
         }
 
         // First, delete all questions associated with the session
-        await deleteMany({ session: session._id });
+        await Question.deleteMany({ session: session._id });
 
         // Then, delete the session
         await session.deleteOne();
@@ -98,4 +100,4 @@ export async function deleteSession(req, res) {
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
-}
+};
